@@ -8,12 +8,18 @@
 
 from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtCore import QSize, pyqtSlot
-from PyQt6.QtWidgets import QListWidgetItem, QWidget
+from PyQt6.QtGui import QWindow
+from PyQt6.QtWidgets import QListWidgetItem, QWidget, QDialog
 
+from src.data_types import Partner
+from src.edit_window import UiEditWindow
 from src.item_list import Ui_Form
 
 
 class Ui_MainWindow(object):
+    def __init__(self):
+        self.ui_edit = None
+
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(800, 600)
@@ -33,6 +39,8 @@ class Ui_MainWindow(object):
         self.create_button = QtWidgets.QPushButton(parent=self.centralwidget)
         self.create_button.setGeometry(QtCore.QRect(14, 470, 771, 24))
         self.create_button.setObjectName("create_button")
+        self.create_button.clicked.connect(self.create_click)
+
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(parent=MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 32))
@@ -42,8 +50,26 @@ class Ui_MainWindow(object):
         self.statusbar.setObjectName("statusbar")
         MainWindow.setStatusBar(self.statusbar)
 
+        self.edit_window = QtWidgets.QWidget()
+        self.ui_edit = UiEditWindow()
+        self.ui_edit.setupUi(self.edit_window, self)
+
+        self.listWidget.itemDoubleClicked.connect(self.edit_click)
+
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
+
+    def create_click(self):
+        self.ui_edit.retranslateUi(self.edit_window, Partner())
+        self.edit_window.show()
+
+    def edit_click(self, item: QListWidgetItem):
+        partner = item.data(QtCore.Qt.ItemDataRole.UserRole)
+        self.ui_edit.retranslateUi(self.edit_window, partner)
+        self.edit_window.show()
+
+    def clear_list(self):
+        self.listWidget.clear()
 
 
     def retranslateUi(self, MainWindow):
@@ -54,12 +80,12 @@ class Ui_MainWindow(object):
     def show_data(self, partners):
         for partner in partners:
             widget = QWidget()
-
             ui_form = Ui_Form()
             ui_form.setupUi(widget, partner)
 
             item = QListWidgetItem()
-            item.setSizeHint(QSize(400, 108))
+            item.setSizeHint(QSize(800, 150))
+            item.setData(QtCore.Qt.ItemDataRole.UserRole, partner)
             self.listWidget.addItem(item)
             self.listWidget.setItemWidget(item, widget)
 
