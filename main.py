@@ -1,6 +1,6 @@
 from src.main_window import Ui_MainWindow
-from src.repository import load_data_with_skidka, calculate_skidka
-from PyQt6 import QtCore, QtGui, QtWidgets
+from src.repository import load_data_with_skidka
+from PyQt6 import QtWidgets
 
 if __name__ == '__main__':
     partners = load_data_with_skidka()

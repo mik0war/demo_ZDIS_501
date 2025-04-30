@@ -19,13 +19,16 @@ def close_connection(connection, cursor):
     connection.close()
 
 
+# Метод для получения списка партнёров
+#Скидка рассчитывается в SQL запросе на основании продаж
 def load_data_with_skidka():
     con, cur = get_connection()
 
     cur.execute(
         "SELECT p.*, COALESCE(total_sums.sums, 0) "
         "FROM Partners p LEFT JOIN "
-        "(SELECT CASE WHEN SUM(product_count) < 10000 THEN 0 WHEN SUM(product_count) >= 10000 and SUM(product_count) < 50000 THEN 5 WHEN SUM(product_count) >= 50000 and SUM(product_count) < 300000 THEN 10 ELSE 15 END as sums, partner FROM partner_products GROUP BY partner) total_sums ON p.id = total_sums.partner")
+        "(SELECT CASE "
+        "   WHEN SUM(product_count) < 10000 THEN 0 WHEN SUM(product_count) >= 10000 and SUM(product_count) < 50000 THEN 5 WHEN SUM(product_count) >= 50000 and SUM(product_count) < 300000 THEN 10 ELSE 15 END as sums, partner FROM partner_products GROUP BY partner) total_sums ON p.id = total_sums.partner")
     partners = [Partner(*i) for i in cur.fetchall()]
     close_connection(con, cur)
     return partners
